@@ -123,8 +123,23 @@ compinit -i
 alias zdots='git --git-dir="$HOME/.zdotfiles_linux/" --work-tree="$HOME"'
 
 # ----------------------------
+# Secret checking for zdots commits
+# ----------------------------
+zdots-secret-check() {
+  local patterns='PRIVATE KEY|OPENAI_API_KEY|ANTHROPIC_API_KEY|GEMINI_API_KEY|API[_-]?KEY|TOKEN|SECRET|PASSWORD|AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY|BEGIN RSA|BEGIN OPENSSH|BEGIN EC'
+  echo "Checking staged zdots diff for obvious secrets..."
+  if zdots diff --cached | grep -E -i "$patterns"; then
+    echo
+    echo "⚠️  Possible secret-like content found in staged changes."
+    echo "Review before commit/push."
+    return 1
+  else
+    echo "✅ No obvious secret patterns found in staged changes."
+  fi
+}
+
+# ----------------------------
 # Local overrides (optional)
 # ----------------------------
 # Put host-specific stuff here (work VPN env vars, private tokens, etc.)
 [[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
-
